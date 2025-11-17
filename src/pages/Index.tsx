@@ -1,10 +1,13 @@
-import { useState } from "react";
+// src/pages/Index.tsx
+
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MarketCard } from "@/components/market/MarketCard";
 import { MarketFilters } from "@/components/market/MarketFilters";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, Users, DollarSign, BarChart3 } from "lucide-react";
 
 // Mock data
@@ -65,17 +68,42 @@ const mockMarkets = [
   },
 ];
 
+// Helper component for Market Card Skeleton
+const MarketCardSkeleton = () => (
+  <Card className="p-6 bg-gradient-card border-border/50">
+    <Skeleton className="h-4 w-1/4 mb-4" />
+    <Skeleton className="h-6 w-full mb-6" />
+    <div className="grid grid-cols-2 gap-3 mb-4">
+      <Skeleton className="h-20 w-full" />
+      <Skeleton className="h-20 w-full" />
+    </div>
+    <Skeleton className="h-4 w-1/2 mb-4" />
+    <Skeleton className="h-10 w-full" />
+  </Card>
+);
+
+
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("open");
   const [selectedSort, setSelectedSort] = useState("volume");
+  const [isLoading, setIsLoading] = useState(true); // --- MOCK LOADING STATE ---
+
+  useEffect(() => {
+    // Simulate fetching data for 1.5 seconds
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+  // ------------------------------------
+
+  const marketsToDisplay = isLoading ? Array(6).fill({}) : mockMarkets;
 
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Header />
 
       {/* Hero Section */}
-      <section className="relative border-b border-border/40 bg-gradient-to-b from-background to-secondary/20">
+      <section className="relative border-b border-border/40 bg-gradient-to-b from-background to-secondary/20 pt-16 lg:pt-0"> {/* Added pt-16 for mobile header clearance */}
         <div className="container px-4 py-16">
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
@@ -96,34 +124,50 @@ const Index = () => {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8">
-              <Card className="p-4 bg-gradient-card border-border/50">
-                <div className="flex flex-col items-center gap-2">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                  <div className="text-2xl font-bold">$12.5M</div>
-                  <div className="text-xs text-muted-foreground">Total Volume</div>
-                </div>
-              </Card>
-              <Card className="p-4 bg-gradient-card border-border/50">
-                <div className="flex flex-col items-center gap-2">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                  <div className="text-2xl font-bold">24</div>
-                  <div className="text-xs text-muted-foreground">Active Markets</div>
-                </div>
-              </Card>
-              <Card className="p-4 bg-gradient-card border-border/50">
-                <div className="flex flex-col items-center gap-2">
-                  <Users className="h-6 w-6 text-primary" />
-                  <div className="text-2xl font-bold">15.2K</div>
-                  <div className="text-xs text-muted-foreground">Traders</div>
-                </div>
-              </Card>
-              <Card className="p-4 bg-gradient-card border-border/50">
-                <div className="flex flex-col items-center gap-2">
-                  <TrendingUp className="h-6 w-6 text-success" />
-                  <div className="text-2xl font-bold">147</div>
-                  <div className="text-xs text-muted-foreground">Markets Resolved</div>
-                </div>
-              </Card>
+              {/* Added loading state to stats cards */}
+              {isLoading ? (
+                Array(4).fill(0).map((_, i) => (
+                  <Card key={i} className="p-4 bg-gradient-card border-border/50">
+                    <div className="flex flex-col items-center gap-2">
+                      <Skeleton className="h-6 w-6 rounded-full" />
+                      <Skeleton className="h-8 w-1/2" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                // Original Stats Cards
+                <>
+                  <Card className="p-4 bg-gradient-card border-border/50">
+                    <div className="flex flex-col items-center gap-2">
+                      <DollarSign className="h-6 w-6 text-primary" />
+                      <div className="text-2xl font-bold">$12.5M</div>
+                      <div className="text-xs text-muted-foreground">Total Volume</div>
+                    </div>
+                  </Card>
+                  <Card className="p-4 bg-gradient-card border-border/50">
+                    <div className="flex flex-col items-center gap-2">
+                      <BarChart3 className="h-6 w-6 text-primary" />
+                      <div className="text-2xl font-bold">24</div>
+                      <div className="text-xs text-muted-foreground">Active Markets</div>
+                    </div>
+                  </Card>
+                  <Card className="p-4 bg-gradient-card border-border/50">
+                    <div className="flex flex-col items-center gap-2">
+                      <Users className="h-6 w-6 text-primary" />
+                      <div className="text-2xl font-bold">15.2K</div>
+                      <div className="text-xs text-muted-foreground">Traders</div>
+                    </div>
+                  </Card>
+                  <Card className="p-4 bg-gradient-card border-border/50">
+                    <div className="flex flex-col items-center gap-2">
+                      <TrendingUp className="h-6 w-6 text-success" />
+                      <div className="text-2xl font-bold">147</div>
+                      <div className="text-xs text-muted-foreground">Markets Resolved</div>
+                    </div>
+                  </Card>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -148,15 +192,21 @@ const Index = () => {
           <div className="flex-1">
             <div className="mb-6">
               <h2 className="text-2xl font-bold mb-2">Active Markets</h2>
-              <p className="text-muted-foreground">
-                {mockMarkets.length} markets available
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-4 w-1/4" />
+              ) : (
+                <p className="text-muted-foreground">
+                  {mockMarkets.length} markets available
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {mockMarkets.map((market) => (
-                <MarketCard key={market.id} {...market} />
-              ))}
+              {isLoading
+                ? marketsToDisplay.map((_, index) => <MarketCardSkeleton key={index} />)
+                : marketsToDisplay.map((market) => (
+                    <MarketCard key={market.id} {...market} />
+                  ))}
             </div>
           </div>
         </div>
